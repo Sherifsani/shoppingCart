@@ -41,6 +41,16 @@ public class Cart {
         this.cartItems = cartItems;
     }
 
+    public void addCartItem(CartItem item) {
+        cartItems.add(item);
+        item.setCart(this); // make sure cartItem knows which cart it belongs to
+    }
+
+    public void removeCartItem(CartItem item) {
+        cartItems.remove(item);
+        item.setCart(null); // break the association
+    }
+
     public User getUser() {
         return user;
     }
