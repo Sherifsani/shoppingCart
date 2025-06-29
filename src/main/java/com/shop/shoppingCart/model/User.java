@@ -1,5 +1,6 @@
 package com.shop.shoppingCart.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -12,6 +13,7 @@ public class User {
     @Column
     private String username;
 
+    @JsonManagedReference
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "cart_id")
     private Cart cart;

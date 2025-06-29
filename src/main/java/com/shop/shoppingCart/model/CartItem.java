@@ -1,5 +1,6 @@
 package com.shop.shoppingCart.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -9,6 +10,7 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;

@@ -1,5 +1,7 @@
 package com.shop.shoppingCart.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,9 +14,11 @@ public class Cart {
     @GeneratedValue
     private Integer id;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItems = new ArrayList<>();
 
+    @JsonBackReference
     @OneToOne(mappedBy = "cart")
     private User user;
 
