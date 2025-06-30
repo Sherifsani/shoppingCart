@@ -57,4 +57,12 @@ public class CartController {
         CartItem updated = cartItemService.decrementQuantity(cartItemId);
         return ResponseEntity.ok(updated);
     }
+
+    @PatchMapping("/{userId}/apply-coupon/{couponCode}")
+    public ResponseEntity<CartDTO> applyCoupon(
+            @PathVariable Integer userId,
+            @PathVariable String couponCode) {
+        CartDTO updatedCart = cartService.applyCoupon(userId, couponCode);
+        return ResponseEntity.ok(updatedCart);
+    }
 }

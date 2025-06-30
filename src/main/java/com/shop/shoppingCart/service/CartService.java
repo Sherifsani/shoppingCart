@@ -21,15 +21,18 @@ public class CartService {
     private final UserRepository userRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductService productService;
+    private final CouponService couponService;
 
     public CartService(CartRepository cartRepository,
-                       UserRepository userRepository,
-                       CartItemRepository cartItemRepository,
-                       ProductService productService) {
+            UserRepository userRepository,
+            CartItemRepository cartItemRepository,
+            ProductService productService,
+            CouponService couponService) {
         this.cartRepository = cartRepository;
         this.userRepository = userRepository;
         this.cartItemRepository = cartItemRepository;
         this.productService = productService;
+        this.couponService = couponService;
     }
 
     public CartDTO getUserCart(Integer userId) {
@@ -89,22 +92,59 @@ public class CartService {
         return convertToCartDTO(cartRepository.save(userCart));
     }
 
+    public CartDTO applyCoupon(Integer userId, String couponCode) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+
+        Cart cart = user.getCart();
+        if (cart == null) {
+            throw new IllegalStateException("User has no cart");
+        }
+
+        CartDTO cartDTO = convertToCartDTO(cart);
+
+        // Apply coupon discount
+        double discountedAmount = couponService.applyDiscount(
+                cartDTO.getTotalAmount(),
+                couponCode);
+
+        double discount = cartDTO.getTotalAmount() - discountedAmount;
+        cartDTO.setDiscountAmount(discount);
+        cartDTO.setAppliedCoupon(couponCode);
+
+        return cartDTO;
+    }
+
     private CartDTO convertToCartDTO(Cart cart) {
-        List<CartItemDTO> itemDTOs = cart.getCartItems().stream().map(item -> {
-            Product product = productService.getProductById(item.getProductId());
-            return new CartItemDTO(
-                    item.getId(),
-                    product.getId(),
-                    product.getName(),
-                    product.getPrice(),
-                    item.getQuantity()
-            );
-        }).collect(Collectors.toList());
+        List<CartItemDTO> itemDTOs = cart.getCartItems().stream()
+                .map(item -> {
+                    Product product = productService.getProductById(item.getProductId());
+                    if (product == null) {
+                        // If product not found, create a minimal product with available info
+                        return new CartItemDTO(
+                                item.getId(),
+                                item.getProductId(),
+                                "Product not found (ID: " + item.getProductId() + ")",
+                                0.0,
+                                item.getQuantity());
+                    }
+                    return new CartItemDTO(
+                            item.getId(),
+                            product.getId(),
+                            product.getName(),
+                            product.getPrice(),
+                            item.getQuantity());
+                })
+                .collect(Collectors.toList());
 
         double totalAmount = itemDTOs.stream()
-                .mapToDouble(i -> i.getPrice() * i.getQuantity())
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
                 .sum();
 
-        return new CartDTO(itemDTOs, totalAmount);
+        return new CartDTO(
+                cart.getId(),
+                cart.getUser() != null ? cart.getUser().getUsername() : "Unknown User",
+                itemDTOs,
+                totalAmount);
     }
 }
