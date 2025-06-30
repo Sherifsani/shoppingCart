@@ -1,32 +1,46 @@
 package com.shop.shoppingCart.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shop.shoppingCart.model.Product;
+import com.shop.shoppingCart.repository.ProductRepository;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
 public class ProductService {
-    public List<Product> getProducts() {
+
+    private final ProductRepository productRepository;
+    private final ObjectMapper objectMapper;
+
+    @Autowired
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+        this.objectMapper = new ObjectMapper();
+    }
+
+    @PostConstruct
+    public void loadProductsFromJson() {
         try {
-            System.out.println("Loading products.json from classpath...");
-
-            ObjectMapper mapper = new ObjectMapper();
             InputStream inputStream = new ClassPathResource("products.json").getInputStream();
-            List<Product> products = Arrays.asList(mapper.readValue(inputStream, Product[].class));
-
-            System.out.println(" Loaded " + products.size() + " products.");
-            return products;
-
+            List<Product> products = objectMapper.readValue(inputStream, new TypeReference<List<Product>>() {});
+            productRepository.saveAll(products);
+            System.out.println("Products loaded successfully");
         } catch (Exception e) {
-            System.err.println("❌ Failed to load products.json: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Could not load product data", e);
+            System.err.println("Failed to load products: " + e.getMessage());
         }
     }
 
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+
+    public Product getProductById(Integer id) {
+        return productRepository.findById(id).orElse(null);
+    }
 }

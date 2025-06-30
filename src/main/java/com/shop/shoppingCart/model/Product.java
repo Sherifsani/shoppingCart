@@ -1,12 +1,23 @@
 package com.shop.shoppingCart.model;
 
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "products")
 public class Product {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates ID values
     private Integer id;
+
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
     private double price;
 
-    public Product(){}
+    public Product() {}
+
     public Product(Integer id, String name, double price) {
         this.id = id;
         this.name = name;

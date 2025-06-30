@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name  = "cart_items")
+@Table(name = "cart_items")
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,14 +17,20 @@ public class CartItem {
 
     private Integer productId;
 
+    private String productName; // ✅ Added product name
+
     private int quantity;
+
+    private double price; // ✅ Added price for total calculations
 
     public CartItem() {}
 
-    public CartItem(Cart cart, Integer productId, int quantity) {
+    public CartItem(Cart cart, Integer productId, String productName, int quantity, double price) {
         this.cart = cart;
         this.productId = productId;
+        this.productName = productName;
         this.quantity = quantity;
+        this.price = price;
     }
 
     public Integer getId() {
@@ -43,14 +49,6 @@ public class CartItem {
         this.cart = cart;
     }
 
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
     public Integer getProductId() {
         return productId;
     }
@@ -59,4 +57,27 @@ public class CartItem {
         this.productId = productId;
     }
 
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
 }

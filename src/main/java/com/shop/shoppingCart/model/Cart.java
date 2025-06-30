@@ -22,6 +22,17 @@ public class Cart {
     @OneToOne(mappedBy = "cart")
     private User user;
 
+    @Column(name = "total_amount")
+    private Double totalAmount;
+
+    public Double getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(Double totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
     public Cart() {}
 
     public Cart(List<CartItem> cartItems, User user) {
